@@ -6,6 +6,7 @@ import com.pm.patientservice.exception.EmailAlreadyExistsException;
 import com.pm.patientservice.exception.PatientNotFoundException;
 import com.pm.patientservice.grpc.BillingServiceGrpcClient;
 import com.pm.patientservice.model.Patient;
+import com.pm.patientservice.model.PatientStatus;
 import com.pm.patientservice.repository.PatientRepository;
 import jakarta.validation.groups.Default;
 import org.springframework.stereotype.Service;
@@ -43,9 +44,28 @@ public class PatientService {
         {
             throw new EmailAlreadyExistsException("A Patient with this email " + "already exists" + patientRequestDTO.getEmail());
         }
-        Patient newPatient=patientRepository.save(PatientMapper.toModel(patientRequestDTO));
-        billingServiceGrpcClient.createBillingAccount(newPatient.getId().toString(),newPatient.getName(),newPatient.getEmail());
 
+        //STEP 1 :According to Saga Pattern Save the patient status with Pending until billing is created
+        Patient newPatient=PatientMapper.toModel(patientRequestDTO);
+        newPatient.setStatus(PatientStatus.PENDING);
+        newPatient=patientRepository.save(newPatient);
+
+        try{
+            //calling billingservice via gRPC
+            var billingResponse=billingServiceGrpcClient.createBillingAccount(
+                    newPatient.getId().toString(),
+                    newPatient.getName(),
+                    newPatient.getEmail()
+            );
+
+            newPatient.setBillingAccountId(billingResponse.getAccountId());
+            newPatient.setStatus(PatientStatus.ACTIVE);
+        }catch(Exception e)
+        {
+            newPatient.setStatus(PatientStatus.BILLING_FAILED);
+        }
+
+        newPatient=patientRepository.save(newPatient);
         return PatientMapper.toDTO(newPatient);
     }
 

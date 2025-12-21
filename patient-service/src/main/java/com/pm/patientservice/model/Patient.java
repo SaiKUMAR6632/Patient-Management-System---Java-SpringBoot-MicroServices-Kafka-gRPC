@@ -30,6 +30,12 @@ public class Patient {
 
     @NotNull
     private LocalDate registeredDate;
+
+    @Enumerated(EnumType.STRING)
+    private PatientStatus status;
+
+    private String billingAccountId;
+
     public LocalDate getRegisteredDate() {
         return registeredDate;
     }
@@ -76,5 +82,21 @@ public class Patient {
 
     public void setDateOfBirth(LocalDate dateOfBirth) {
         this.dateOfBirth = dateOfBirth;
+    }
+
+    public PatientStatus getStatus() {
+        return status;
+    }
+
+    public void setStatus(PatientStatus status) {
+        this.status = status;
+    }
+
+    public String getBillingAccountId() {
+        return billingAccountId;
+    }
+
+    public void setBillingAccountId(String billingAccountId) {
+        this.billingAccountId = billingAccountId;
     }
 }

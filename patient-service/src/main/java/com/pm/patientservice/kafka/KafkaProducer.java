@@ -10,12 +10,13 @@ import patient.events.PatientEvent;
 @Service
 public class KafkaProducer {
     private static final Logger log = LoggerFactory.getLogger(KafkaProducer.class);
-    //how we define message types,where kafkatemplate is used to send messages from kafka
+    //how we define message types,where kafka template is used to send messages from kafka
     //producer to kafka topic
     private final KafkaTemplate<String,byte[]> kafkaTemplate;
 
-    public KafkaProducer(KafkaTemplate<String,byte[]> kafkaTemplate){
-        this.kafkaTemplate=kafkaTemplate;
+    public KafkaProducer(KafkaTemplate<String, byte[]> kafkaTemplate)
+    {
+        this.kafkaTemplate = kafkaTemplate;
     }
 
     public void sendEvent(Patient patient)
